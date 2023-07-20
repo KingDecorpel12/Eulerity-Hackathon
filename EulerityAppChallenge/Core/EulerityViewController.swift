@@ -20,14 +20,16 @@ class EulerityViewController: UIViewController {
         
         view.backgroundColor = .white
         
-        searchBar.delegate = self // Set the ViewController as the UISearchBarDelegate
+        updateAppearance()
+        
+        searchBar.delegate = self // Sets the view controller as the UISearchBarDelegate
         view.addSubview(searchBar)
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            searchBar.heightAnchor.constraint(equalToConstant: 44) // Set a fixed height for the search bar
+            searchBar.heightAnchor.constraint(equalToConstant: 44) // Sets a fixed height for the search bar
         ])
         
         view.addSubview(scrollView)
@@ -39,9 +41,23 @@ class EulerityViewController: UIViewController {
             scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         
-        fetchPetsData() // API Caller function
+        // Fetches data from API
+        APICaller.fetchPetsData { [weak self] pets, error in
+            if let error = error {
+                print("Error fetching pets: \(error)")
+                return
+            }
+            
+            if let pets = pets {
+                DispatchQueue.main.async {
+                    self?.allPets = pets
+                    self?.filteredPets = pets
+                    self?.displayPets(pets)
+                }
+            }
+        }
         
-        // Add a tap gesture recognizer to the scrollView to handle tap events
+        // Adds a tap gesture recognizer to the scrollView to handle tap events
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         scrollView.addGestureRecognizer(tapGesture)
     }
@@ -52,36 +68,44 @@ class EulerityViewController: UIViewController {
         searchBar.resignFirstResponder()
     }
     
-    func fetchPetsData() {
-        let apiUrl = URL(string: "https://eulerity-hackathon.appspot.com/pets")!
+    // Updates the appearance based on the current user interface style (light/dark mode)
+    func updateAppearance() {
         
-        URLSession.shared.dataTask(with: apiUrl) { [weak self] data, _, error in
-            if let error = error {
-                print("Error: \(error)")
-                return
-            }
-            
-            guard let data = data else {
-                print("Error: No data received")
-                return
-            }
-            
-            do {
-                let pets = try JSONDecoder().decode([Pet].self, from: data)
-                
-                DispatchQueue.main.async { [weak self] in
-                    self?.allPets = pets
-                    self?.filteredPets = pets
-                    self?.displayPets(pets)
-                }
-            } catch {
-                print("Error decoding JSON: \(error)")
+        // Sets the background color of the view controller based on the current user interface style
+        if traitCollection.userInterfaceStyle == .dark {
+            view.backgroundColor = .black
+        } else {
+            view.backgroundColor = .white
+        }
+        
+        // Sets the background color of the scrollView
+        scrollView.backgroundColor = .clear
+        
+        // Sets the text color for labels in light and dark mode
+        let textColor: UIColor
+        if traitCollection.userInterfaceStyle == .dark {
+            textColor = .white
+        } else {
+            textColor = .black
+        }
+        
+        // Sets the text color for the title and description labels inside the scrollView
+        for subview in scrollView.subviews {
+            if let titleLabel = subview as? UILabel {
+                titleLabel.textColor = textColor
+            } else if let descriptionLabel = subview as? UILabel {
+                descriptionLabel.textColor = textColor
             }
         }
-        .resume()
     }
     
-    // Displays data in list format with proper constraints 
+    // Updates the appearance when the user interface style (light/dark mode) changes
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        updateAppearance()
+    }
+    
+    // Displays data in list format with proper constraints
     func displayPets(_ pets: [Pet]) {
         for subview in scrollView.subviews {
             subview.removeFromSuperview()
@@ -167,7 +191,7 @@ class EulerityViewController: UIViewController {
 
 // Conforms the view controller to delegate protocol of search bar
 extension EulerityViewController: UISearchBarDelegate {
-
+    
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchText.isEmpty {
             filteredPets = allPets
@@ -181,5 +205,5 @@ extension EulerityViewController: UISearchBarDelegate {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         view.endEditing(true)
     }
-
+    
 }

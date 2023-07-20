@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1809CF092A69873400DC28C8 /* APICaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1809CF082A69873400DC28C8 /* APICaller.swift */; };
 		188DB6172A686364008CE08E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188DB6162A686364008CE08E /* AppDelegate.swift */; };
 		188DB6192A686364008CE08E /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188DB6182A686364008CE08E /* SceneDelegate.swift */; };
 		188DB61B2A686364008CE08E /* EulerityViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188DB61A2A686364008CE08E /* EulerityViewController.swift */; };
@@ -17,6 +18,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1809CF082A69873400DC28C8 /* APICaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APICaller.swift; sourceTree = "<group>"; };
 		188DB6132A686364008CE08E /* EulerityAppChallenge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EulerityAppChallenge.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		188DB6162A686364008CE08E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		188DB6182A686364008CE08E /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -42,7 +44,6 @@
 		188DB60A2A686364008CE08E = {
 			isa = PBXGroup;
 			children = (
-				188DB62A2A6863F6008CE08E /* Core */,
 				188DB6152A686364008CE08E /* EulerityAppChallenge */,
 				188DB6142A686364008CE08E /* Products */,
 			);
@@ -59,21 +60,39 @@
 		188DB6152A686364008CE08E /* EulerityAppChallenge */ = {
 			isa = PBXGroup;
 			children = (
-				188DB6162A686364008CE08E /* AppDelegate.swift */,
-				188DB6182A686364008CE08E /* SceneDelegate.swift */,
-				188DB61A2A686364008CE08E /* EulerityViewController.swift */,
-				188DB61C2A686364008CE08E /* Main.storyboard */,
-				188DB61F2A686367008CE08E /* Assets.xcassets */,
-				188DB6212A686367008CE08E /* LaunchScreen.storyboard */,
+				18DC4ED22A698CA0000532F7 /* API */,
+				18DC4ED42A698CE3000532F7 /* Core */,
+				18DC4ED32A698CBA000532F7 /* Other */,
 				188DB6242A686367008CE08E /* Info.plist */,
 			);
 			path = EulerityAppChallenge;
 			sourceTree = "<group>";
 		};
-		188DB62A2A6863F6008CE08E /* Core */ = {
+		18DC4ED22A698CA0000532F7 /* API */ = {
 			isa = PBXGroup;
 			children = (
+				1809CF082A69873400DC28C8 /* APICaller.swift */,
 				188DB62B2A6870C6008CE08E /* Pet.swift */,
+			);
+			path = API;
+			sourceTree = "<group>";
+		};
+		18DC4ED32A698CBA000532F7 /* Other */ = {
+			isa = PBXGroup;
+			children = (
+				188DB6162A686364008CE08E /* AppDelegate.swift */,
+				188DB6182A686364008CE08E /* SceneDelegate.swift */,
+				188DB61C2A686364008CE08E /* Main.storyboard */,
+				188DB61F2A686367008CE08E /* Assets.xcassets */,
+				188DB6212A686367008CE08E /* LaunchScreen.storyboard */,
+			);
+			path = Other;
+			sourceTree = "<group>";
+		};
+		18DC4ED42A698CE3000532F7 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				188DB61A2A686364008CE08E /* EulerityViewController.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -152,6 +171,7 @@
 				188DB61B2A686364008CE08E /* EulerityViewController.swift in Sources */,
 				188DB6172A686364008CE08E /* AppDelegate.swift in Sources */,
 				188DB6192A686364008CE08E /* SceneDelegate.swift in Sources */,
+				1809CF092A69873400DC28C8 /* APICaller.swift in Sources */,
 				188DB62C2A6870C6008CE08E /* Pet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
