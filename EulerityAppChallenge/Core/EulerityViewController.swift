@@ -6,6 +6,7 @@
 //  In this challenge, I use UIKit to dyanamically create views and programmatically make a GET request to obtain and load images and their related info in a list format.
 
 import UIKit
+import TOCropViewController
 
 class EulerityViewController: UIViewController {
     
