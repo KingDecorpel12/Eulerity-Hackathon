@@ -3,7 +3,6 @@
 //  EulerityAppChallenge
 //
 //  Created by Omar Hegazy on 7/19/23.
-//  In this challenge, I use UIKit to dyanamically create views and programmatically make a GET request to obtain and load images and their related info in a list format.
 
 import UIKit
 
@@ -62,48 +61,7 @@ class EulerityViewController: UIViewController {
         scrollView.addGestureRecognizer(tapGesture)
     }
     
-    // Handle tap on the scrollView to hide the keyboard and close the search bar
-    @objc func handleTap() {
-        view.endEditing(true)
-        searchBar.resignFirstResponder()
-    }
-    
-    // Updates the appearance based on the current user interface style (light/dark mode)
-    func updateAppearance() {
-        
-        // Sets the background color of the view controller based on the current user interface style
-        if traitCollection.userInterfaceStyle == .dark {
-            view.backgroundColor = .black
-        } else {
-            view.backgroundColor = .white
-        }
-        
-        // Sets the background color of the scrollView
-        scrollView.backgroundColor = .clear
-        
-        // Sets the text color for labels in light and dark mode
-        let textColor: UIColor
-        if traitCollection.userInterfaceStyle == .dark {
-            textColor = .white
-        } else {
-            textColor = .black
-        }
-        
-        // Sets the text color for the title and description labels inside the scrollView
-        for subview in scrollView.subviews {
-            if let titleLabel = subview as? UILabel {
-                titleLabel.textColor = textColor
-            } else if let descriptionLabel = subview as? UILabel {
-                descriptionLabel.textColor = textColor
-            }
-        }
-    }
-    
-    // Updates the appearance when the user interface style (light/dark mode) changes
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        updateAppearance()
-    }
+    // MARK: - Display Data
     
     // Displays data in list format with proper constraints
     func displayPets(_ pets: [Pet]) {
@@ -150,6 +108,11 @@ class EulerityViewController: UIViewController {
             }
             .resume()
             
+            // Add tap gesture recognizer to each imageView
+            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleImageTap(_:)))
+            imageView.isUserInteractionEnabled = true
+            imageView.addGestureRecognizer(tapGesture)
+            
             // Creates and configures the title label
             let titleLabel = UILabel()
             titleLabel.text = pet.title
@@ -184,10 +147,171 @@ class EulerityViewController: UIViewController {
             offsetY += imageSize + spacing + 8 + titleLabel.intrinsicContentSize.height + descriptionLabel.intrinsicContentSize.height + 16
         }
         
-        // Constrain the bottom of the scroll view to the last image view
-        scrollView.bottomAnchor.constraint(equalTo: imageViews.last!.bottomAnchor, constant: 16).isActive = true
+        // Constrain the bottom of the scroll view to the last image view (if exists)
+        if let lastImageView = imageViews.last {
+            scrollView.bottomAnchor.constraint(equalTo: lastImageView.bottomAnchor, constant: 16).isActive = true
+        }
+    }
+    
+    // MARK: - Save & Upload Images
+    
+    // Handle tap on the imageView to show the action sheet for image upload options
+    @objc func handleImageTap(_ gestureRecognizer: UITapGestureRecognizer) {
+        guard let imageView = gestureRecognizer.view as? UIImageView,
+              let image = imageView.image else {
+            return
+        }
+        
+        showUploadOptions(image: image)
+    }
+    
+    // Function to create and show an action sheet for image upload options
+    func showUploadOptions(image: UIImage) {
+        let actionSheet = UIAlertController(title: "Upload Image", message: "Choose an option", preferredStyle: .actionSheet)
+        
+        // Add an action to upload the image
+        let uploadAction = UIAlertAction(title: "Upload", style: .default) { [weak self] _ in
+            // Show an alert for entering the App Id
+            self?.showAppIdAlert(image: image)
+        }
+        actionSheet.addAction(uploadAction)
+        
+        // Add a cancel action
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        actionSheet.addAction(cancelAction)
+        
+        // Present the action sheet
+        present(actionSheet, animated: true, completion: nil)
+    }
+    
+    // Function to create and show an alert for entering App Id
+    func showAppIdAlert(image: UIImage) {
+        let alert = UIAlertController(title: "Enter App Id", message: nil, preferredStyle: .alert)
+        
+        alert.addTextField { textField in
+            textField.placeholder = "App Id"
+        }
+        
+        // Add an action to upload the image with the entered App Id
+        let uploadAction = UIAlertAction(title: "Upload", style: .default) { [weak self] _ in
+            if let appId = alert.textFields?.first?.text {
+                self?.uploadImageToServer(image, appId: appId)
+            }
+        }
+        alert.addAction(uploadAction)
+        
+        // Add a cancel action
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        alert.addAction(cancelAction)
+        
+        // Present the alert
+        present(alert, animated: true, completion: nil)
+    }
+    
+    // Function to save the image locally on the device and return the URL
+    func saveImageLocally(_ image: UIImage, imageName: String) -> URL? {
+        if let data = image.jpegData(compressionQuality: 1.0) {
+            let fileManager = FileManager.default
+            if let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first {
+                let fileURL = documentsDirectory.appendingPathComponent("\(imageName).jpg")
+                do {
+                    try data.write(to: fileURL)
+                    print("Image saved locally.")
+                    return fileURL
+                } catch {
+                    print("Error saving image locally: \(error)")
+                }
+            }
+        }
+        return nil
+    }
+    
+    // Function to get the URL of the locally saved image
+    func getLocalImageURL() -> URL? {
+        let fileManager = FileManager.default
+        if let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first {
+            return documentsDirectory.appendingPathComponent("uploaded_image.jpg")
+        }
+        return nil
+    }
+    
+    // Function to handle image upload to the server with the provided App Id
+    func uploadImageToServer(_ image: UIImage, appId: String) {
+        // Save the image locally
+        if let imageUrl = saveImageLocally(image, imageName: "uploaded_image") {
+            print("Local image URL: \(imageUrl)")
+        }
+        
+        // Get the upload URL from the server
+        APICaller.getUploadURL { [weak self] result in
+            switch result {
+            case .success(let uploadURL):
+                // Upload the image to the server with the provided App Id
+                APICaller.uploadImage(imageURL: (self?.getLocalImageURL())!, appID: appId, originalURL: uploadURL) { uploadResult in
+                    switch uploadResult {
+                    case .success(let uploaded):
+                        if uploaded {
+                            print("Image uploaded successfully.")
+                        } else {
+                            print("Image upload failed.")
+                        }
+                    case .failure(let error):
+                        print("Image upload error: \(error)")
+                    }
+                }
+            case .failure(let error):
+                print("Error fetching upload URL: \(error)")
+            }
+        }
+    }
+    
+    // MARK: - Other
+    
+    // Handle tap on the scrollView to hide the keyboard and close the search bar
+    @objc func handleTap() {
+        view.endEditing(true)
+        searchBar.resignFirstResponder()
+    }
+    
+    // Updates the appearance based on the current user interface style (light/dark mode)
+    func updateAppearance() {
+        
+        // Sets the background color of the view controller based on the current user interface style
+        if traitCollection.userInterfaceStyle == .dark {
+            view.backgroundColor = .black
+        } else {
+            view.backgroundColor = .white
+        }
+        
+        // Sets the background color of the scrollView
+        scrollView.backgroundColor = .clear
+        
+        // Sets the text color for labels in light and dark mode
+        let textColor: UIColor
+        if traitCollection.userInterfaceStyle == .dark {
+            textColor = .white
+        } else {
+            textColor = .black
+        }
+        
+        // Sets the text color for the title and description labels inside the scrollView
+        for subview in scrollView.subviews {
+            if let titleLabel = subview as? UILabel {
+                titleLabel.textColor = textColor
+            } else if let descriptionLabel = subview as? UILabel {
+                descriptionLabel.textColor = textColor
+            }
+        }
+    }
+    
+    // Updates the appearance when the user interface style (light/dark mode) changes
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        updateAppearance()
     }
 }
+
+// MARK: - Extensions
 
 // Conforms the view controller to delegate protocol of search bar
 extension EulerityViewController: UISearchBarDelegate {
