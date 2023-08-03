@@ -69,37 +69,37 @@ class EulerityViewController: UIViewController {
             subview.removeFromSuperview()
         }
         imageViews.removeAll()
-        
+
         let imageSize: CGFloat = 200
         let spacing: CGFloat = 16
         var offsetY: CGFloat = 16 // Initial offset from the top
-        
+
         for pet in pets {
             let imageView = UIImageView()
             imageView.contentMode = .scaleAspectFit
             imageView.translatesAutoresizingMaskIntoConstraints = false
             scrollView.addSubview(imageView)
-            
+
             // Stores the image view in an array
             imageViews.append(imageView)
-            
+
             // Constrains the image view size
             imageView.heightAnchor.constraint(equalToConstant: imageSize).isActive = true
             imageView.widthAnchor.constraint(equalToConstant: imageSize).isActive = true
-            
+
             // Horizontally centers the image view
             imageView.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor).isActive = true
-            
+
             // Vertically spaces the image view
             imageView.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: offsetY).isActive = true
-            
+
             // Loads the image asynchronously
             URLSession.shared.dataTask(with: pet.url) { data, _, error in
                 if let error = error {
                     print("Error loading image: \(error)")
                     return
                 }
-                
+
                 if let data = data, let image = UIImage(data: data) {
                     DispatchQueue.main.async {
                         imageView.image = image
@@ -107,12 +107,12 @@ class EulerityViewController: UIViewController {
                 }
             }
             .resume()
-            
+
             // Add tap gesture recognizer to each imageView
             let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleImageTap(_:)))
             imageView.isUserInteractionEnabled = true
             imageView.addGestureRecognizer(tapGesture)
-            
+
             // Creates and configures the title label
             let titleLabel = UILabel()
             titleLabel.text = pet.title
@@ -120,38 +120,55 @@ class EulerityViewController: UIViewController {
             titleLabel.font = UIFont.boldSystemFont(ofSize: 18)
             titleLabel.translatesAutoresizingMaskIntoConstraints = false
             scrollView.addSubview(titleLabel)
-            
+
             // Places the title label below the image view
             titleLabel.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 8).isActive = true
             titleLabel.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor).isActive = true
-            
+
             // Creates and configures the description label
             let descriptionLabel = UILabel()
             descriptionLabel.text = pet.description
             descriptionLabel.textAlignment = .center
             descriptionLabel.numberOfLines = 0 // Allows multiple lines
             descriptionLabel.lineBreakMode = .byWordWrapping // Wraps text to a new line
-            descriptionLabel.font = UIFont.systemFont(ofSize: 14)
+            descriptionLabel.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
             descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
             scrollView.addSubview(descriptionLabel)
-            
+
             // Places the description label below the title label
             descriptionLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4).isActive = true
             descriptionLabel.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor).isActive = true
-            
+
             // Constrain the description label's leading and trailing to the scroll view
             descriptionLabel.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 16).isActive = true
             descriptionLabel.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -16).isActive = true
             
+            // Creates and configures the created label
+            let createdLabel = UILabel()
+            createdLabel.text = pet.created
+            createdLabel.textAlignment = .center
+            createdLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+            createdLabel.translatesAutoresizingMaskIntoConstraints = false
+            scrollView.addSubview(createdLabel)
+            
+            // Places the created label below the description label
+            createdLabel.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 4).isActive = true
+            createdLabel.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor).isActive = true
+            
+            // Constrain the created label's leading and trailing to the scroll view
+            createdLabel.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 16).isActive = true
+            createdLabel.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -16).isActive = true
+
             // Updates the offsetY for the next set of views
-            offsetY += imageSize + spacing + 8 + titleLabel.intrinsicContentSize.height + descriptionLabel.intrinsicContentSize.height + 16
+            offsetY += imageSize + spacing + 14 + titleLabel.intrinsicContentSize.height + descriptionLabel.intrinsicContentSize.height + 20
         }
-        
+
         // Constrain the bottom of the scroll view to the last image view (if exists)
         if let lastImageView = imageViews.last {
             scrollView.bottomAnchor.constraint(equalTo: lastImageView.bottomAnchor, constant: 16).isActive = true
         }
     }
+
     
     // MARK: - Save & Upload Images
     

@@ -11,4 +11,5 @@ struct Pet: Decodable {
     let title: String
     let description: String
     let url: URL
+    let created: String
 }
