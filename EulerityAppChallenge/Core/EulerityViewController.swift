@@ -40,7 +40,17 @@ class EulerityViewController: UIViewController {
             scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         
-        // Fetches data from API
+        fetchPetsData()
+        
+        // Adds a tap gesture recognizer to the scrollView to handle tap events
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        scrollView.addGestureRecognizer(tapGesture)
+    }
+    
+    // MARK: - Display Data
+    
+    // Fetches data from API
+    func fetchPetsData() {
         APICaller.fetchPetsData { [weak self] pets, error in
             if let error = error {
                 print("Error fetching pets: \(error)")
@@ -55,13 +65,7 @@ class EulerityViewController: UIViewController {
                 }
             }
         }
-        
-        // Adds a tap gesture recognizer to the scrollView to handle tap events
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        scrollView.addGestureRecognizer(tapGesture)
     }
-    
-    // MARK: - Display Data
     
     // Displays data in list format with proper constraints
     func displayPets(_ pets: [Pet]) {
@@ -169,7 +173,6 @@ class EulerityViewController: UIViewController {
         }
     }
 
-    
     // MARK: - Save & Upload Images
     
     // Handle tap on the imageView to show the action sheet for image upload options
